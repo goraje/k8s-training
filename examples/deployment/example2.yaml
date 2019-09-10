@@ -1,0 +1,48 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flaskapp
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: flaskapp-deploy
+  namespace: flaskapp
+  labels:
+    app: flaskapp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: flaskapp
+  template:
+    metadata:
+      labels:
+        app: flaskapp
+    spec:
+      containers:
+        - name: flaskapp
+          image: goraje/flaskapp:1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: flask-port
+              containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flaskapp-svc
+  namespace: flaskapp
+  labels:
+    app: flaskapp
+spec:
+  ports:
+    - port: 80
+      targetPort: flask-port
+      protocol: TCP
+  selector:
+    app: flaskapp
+  type: LoadBalancer
+---
+

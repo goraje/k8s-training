@@ -1,0 +1,92 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flaskapp
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: flaskapp-pvc
+  namespace: flaskapp
+  labels:
+    app: flaskapp
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: flaskapp-po
+  namespace: flaskapp
+  labels:
+    app: flaskapp
+spec:
+  volumes:
+    - name: flaskapp-storage
+      persistentVolumeClaim:
+        claimName: flaskapp-pvc
+  containers:
+    - name: flaskapp1
+      image: goraje/flaskapp:5
+      env:
+        - name: APP_PORT
+          value: "5000"
+      ports:
+        - name: flask-port1
+          containerPort: 5000
+      volumeMounts:
+        - mountPath: "/mnt/data"
+          name: flaskapp-storage
+    - name: flaskapp2
+      image: goraje/flaskapp:5
+      env:
+        - name: APP_PORT
+          value: "6000"
+      ports:
+        - name: flask-port2
+          containerPort: 6000
+      volumeMounts:
+        - mountPath: "/mnt/data"
+          name: flaskapp-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flaskapp-svc1
+  namespace: flaskapp
+  labels:
+    app: flaskapp
+spec:
+  ports:
+    - port: 80
+      targetPort: flask-port1
+      protocol: TCP
+      name: flask-svc-port1
+  selector:
+    app: flaskapp
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flaskapp-svc2
+  namespace: flaskapp
+  labels:
+    app: flaskapp
+spec:
+  ports:
+    - port: 80
+      targetPort: flask-port2
+      protocol: TCP
+      name: flask-svc-port2
+  selector:
+    app: flaskapp
+  type: LoadBalancer
+---
+

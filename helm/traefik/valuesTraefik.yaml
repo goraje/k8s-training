@@ -1,0 +1,13 @@
+---
+rbac:
+  enabled: true
+
+dashboard:
+  enabled: true
+
+ssl:
+  enabled: true
+  generateTLS: true
+  insecureSkipVerify: true
+---
+
